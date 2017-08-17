@@ -1,8 +1,11 @@
-import requests
-from pathlib import Path
-import sys
-import json
+import argparse
 import getpass
+import json
+import sys
+from pathlib import Path
+
+import requests
+from terminaltables import AsciiTable
 
 
 def _authenticate(username, url_root):
@@ -44,21 +47,18 @@ def _refresh_token(config):
 
 def _pretify_json(content):
     data = json.loads(content)
-    result = None
     if isinstance(data, list):
         cpt = 0
         rows = list()
         for row in data:
             if cpt == 0:
-                rows.append('\t\t\t'.join(row.keys()))
+                rows.append(sorted(row.keys()))
 
-            rows.append('\t\t\t'.join([row[k] for k in row.keys()]))
+            rows.append([row[k] for k in sorted(row.keys())])
 
             cpt += 1
 
-        result = '\n'.join(rows)
-
-    return result
+        return AsciiTable(rows)
 
 
 def _make_request(verb, url, data, headers, config, retry=False):
@@ -97,7 +97,17 @@ def _make_request(verb, url, data, headers, config, retry=False):
     return result
 
 
-def _handle_command(command, domain, subcommand, config, datafile=None):
+def _handle_parameters(params):
+    if params is None:
+        return None
+    cute_params = dict()
+    for p in params:
+        kv = p.split('=')
+        cute_params[kv[0]] = kv[1]
+    return cute_params
+
+
+def _handle_command(command, domain, config, datafile, params):
     data = None
     if datafile:
         with open(datafile, 'r') as f:
@@ -105,30 +115,33 @@ def _handle_command(command, domain, subcommand, config, datafile=None):
 
     headers = {'Authorization': config['token']}
 
-    if command == 'cmd':
-        url = ''.join([config['url_root'], '/api/v1/command/{}/{}'.format(domain, subcommand)])
+    if command in ('add', 'delete',):
+        url = ''.join([config['url_root'], '/api/v1/command/{}/{}'.format(domain, command)])
         result = _make_request('POST', url, data, headers, config)
+        print(result)
     elif command == 'get':
-        url = ''.join([config['url_root'], '/api/v1/query/{}/{}'.format(domain, subcommand)])
-        result = _make_request('GET', url, data, headers, config)
+        url = ''.join([config['url_root'], '/api/v1/query/{}'.format(domain)])
+        result = _make_request('GET', url, _handle_parameters(params), headers, config)
+        print(result.table)
     else:
         print('Unknown command type: {}'.format(command))
         sys.exit(1)
 
-    print(result)
-
 if __name__ == '__main__':
     config = _handle_config()
 
-    if len(sys.argv) < 1:
-        print('Wrong arguments. Usage <cmd|get> ...')
-        sys.exit(1)
+    parser = argparse.ArgumentParser('Toolkit for 16Megabytes API')
+    parser.add_argument('command', choices=['get', 'add', 'delete'],
+                        help='command type (add: create or update, get: read, delete: remove)')
+    parser.add_argument('domain', help='related domain')
+    parser.add_argument('--file', '-f', help='JSON format datafile')
+    parser.add_argument('--param', '-p', help='parameters JSON string', action='append')
 
-    command = sys.argv[1]
-    domain = sys.argv[2]
-    subcommand = sys.argv[3]
-    datafile = None
-    if len(sys.argv) > 4:
-        datafile = sys.argv[4]
+    args = parser.parse_args()
 
-    _handle_command(command, domain, subcommand, config, datafile)
+    command = args.command
+    domain = args.domain
+    datafile = args.file
+    params = args.param
+
+    _handle_command(command, domain, config, datafile, params)
