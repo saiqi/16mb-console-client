@@ -1,10 +1,31 @@
+import datetime
+import json
+import os
+import pathlib
+
+import jwt
 import pytest
 
 
-def pytest_addoption(parser):
-    parser.addoption('--test-config-file', action='store', dest='TEST_CONFIG_FILE')
-    
+@pytest.fixture
+def good_token():
+    expiration = datetime.datetime.now() + datetime.timedelta(days=1)
+    yield jwt.encode({'exp': expiration}, 'secret', algorithm='HS256').decode('utf-8')
+
 
 @pytest.fixture
-def config_file(request):
-    return request.config.getoption('TEST_CONFIG_FILE')
+def expired_token():
+    expiration = datetime.datetime.now() - datetime.timedelta(days=1)
+    yield jwt.encode({'exp': expiration}, 'secret', algorithm='HS256').decode('utf-8')
+
+
+@pytest.fixture
+def config_file():
+    path = pathlib.Path(os.getenv('DSAS_CONFIG_FILE'))
+    content = json.dumps({
+        'username': 'test',
+        'base_url': 'http://myurl',
+        'auth_token': ''
+    })
+    path.write_text(content)
+    yield path

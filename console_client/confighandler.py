@@ -50,4 +50,4 @@ def get_config(updated_key=None, updated_value=None):
     else:
         config[updated_key] = updated_value
         _save_config(config)
-        return get_config(updated_key, updated_value)
+        return get_config()
