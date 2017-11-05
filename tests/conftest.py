@@ -21,7 +21,7 @@ def expired_token():
 
 @pytest.fixture
 def config_file():
-    path = pathlib.Path(os.getenv('DSAS_CONFIG_FILE'))
+    path = pathlib.Path(os.getenv('_16MB_CONFIG_FILE'))
     content = json.dumps({
         'username': 'test',
         'base_url': 'http://myurl',

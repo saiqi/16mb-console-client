@@ -4,9 +4,9 @@ from pathlib import Path
 
 
 def _get_config_path():
-    if 'DSAS_CONFIG_FILE' in os.environ:
-        return Path(os.getenv('DSAS_CONFIG_FILE'))
-    return Path.home().joinpath('.dsas.json')
+    if '_16MB_CONFIG_FILE' in os.environ:
+        return Path(os.getenv('_16MB_CONFIG_FILE'))
+    return Path.home().joinpath('.16mb.json')
 
 
 def _open_config():
@@ -21,7 +21,7 @@ def _open_config():
 def _save_config(config):
     path = _get_config_path()
 
-    if path.exists():
+    if config:
         path.write_text(json.dumps(config))
         return config
 
@@ -43,7 +43,7 @@ def get_config(updated_key=None, updated_value=None):
     if config is None:
         config = _init_config()
         _save_config(config)
-        return get_config(updated_key, updated_value)
+        return get_config()
 
     if updated_key is None:
         return config
