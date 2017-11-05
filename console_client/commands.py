@@ -84,3 +84,29 @@ class PurePostCommand(Command):
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
 
         return json.loads(r.text)
+
+class CommandById(Command):
+
+    def init_parser(self, parser):
+        parser.add_argument('id', help='Resource Id')
+        return parser
+
+    def main(self, args):
+        resolved_suffix = self.url_suffix.replace('<id>', args.id)
+        url = ''.join([self.base_url, resolved_suffix])
+
+        if self.method_verb == 'POST':
+            r = requests.post(url, headers=self.headers)
+        elif self.method_verb == 'DELETE':
+            r = requests.delete(url, headers=self.headers)
+        elif self.method_verb == 'GET':
+            r = requests.get(url, headers=self.headers)
+        elif self.method_verb == 'PUT':
+            r = requests.put(url, headers=self.headers)
+        else:
+            raise CommandError('Unsupported HTTP verb: {}'.format(self.method_verb))
+            
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return json.loads(r.text)
