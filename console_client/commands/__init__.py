@@ -14,10 +14,11 @@ class CommandError(Exception):
 
 class Command(object):
 
-    def __init__(self, name, url_suffix, method_verb='POST'):
-        self.__name = name
-        self.__url_suffix = url_suffix
-        self.__method_verb = method_verb
+    name = None
+    url_suffix = None
+    method_verb = None
+
+    def __init__(self):
         self._handle_config()
 
     def _authenticate(self):
@@ -52,30 +53,6 @@ class Command(object):
 
         self.headers = {'Authorization': auth_token}
 
-    @property
-    def name(self):
-        return self.__name
-
-    @name.setter
-    def name(self, name):
-        self.__name = name
-
-    @property
-    def url_suffix(self):
-        return self.__url_suffix
-
-    @url_suffix.setter
-    def url_suffix(self, url_suffix):
-        self.__url_suffix = url_suffix
-
-    @property
-    def method_verb(self):
-        return self.__method_verb
-
-    @method_verb.setter
-    def method_verb(self, method_verb):
-        self.__method_verb = method_verb
-
     def init_parser(self, parser):
         raise NotImplementedError
 
@@ -85,12 +62,15 @@ class Command(object):
 
 class PurePostCommand(Command):
 
+    method_verb = 'POST'
+
     def init_parser(self, parser):
         parser.add_argument('--file', '-f', default='', help='Command configuration file')
         return parser
 
     def main(self, args):
-        data = yaml.load(args.file)
+        with open(args.file, 'r') as f:
+            data = yaml.load(f.read())
         url = ''.join([self.base_url, self.url_suffix])
 
         r = requests.post(url, data=json.dumps(data), headers=self.headers)
