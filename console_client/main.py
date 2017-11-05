@@ -5,6 +5,7 @@ import sys
 
 from console_client.commands import CommandError
 from . import custom_commands
+from console_client.displayer import display
 
 
 def print_error(*args, **kwargs):
@@ -58,3 +59,5 @@ def main():
     except CommandError as e:
         print_error('An error has occured while processing command: {}'.format(str(e)))
         raise
+        
+    display(res)
