@@ -65,7 +65,7 @@ class DeleteTemplate(CommandById):
     
 
 class GetTemplateById(CommandById):
-    name = 'get_template_by_id'
+    name = 'get_template'
     url_suffix = '/api/v1/query/metadata/template/<id>'
     method_verb = 'GET'
 
