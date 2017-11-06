@@ -4,7 +4,7 @@ import json
 import requests
 import yaml
 
-from console_client.commands import PurePostCommand, CommandById
+from console_client.commands import PurePostCommand, CommandById, PureGetCommand
 from console_client.confighandler import get_config
 
 
@@ -59,6 +59,29 @@ def test_command_by_id(mocker, config_file, good_token):
             self.status_code = 200
 
     url = ''.join([cmd.base_url, cmd.url_suffix.replace('<id>', 'my_id')])
+    headers = {'Authorization': good_token}
+    mocker.patch('requests.get', side_effect=lambda url, headers: MockResponse())
+    result = cmd.main(args)
+    requests.get.assert_called_once_with(url, headers=headers)
+    assert result['id'] == 'my_id'
+    
+    
+def test_pure_get_command(mocker, config_file, good_token):
+    get_config(updated_key='auth_token', updated_value=good_token)
+    cmd = PureGetCommand()
+    cmd.name = 'my_command'
+    cmd.url_suffix = '/myendpoint'
+    
+    parser = argparse.ArgumentParser()
+    parser = cmd.init_parser(parser)
+    args = parser.parse_args()
+    
+    class MockResponse(object):
+        def __init__(self):
+            self.text = json.dumps({'id': 'my_id'})
+            self.status_code = 200
+    
+    url = ''.join([cmd.base_url, cmd.url_suffix])
     headers = {'Authorization': good_token}
     mocker.patch('requests.get', side_effect=lambda url, headers: MockResponse())
     result = cmd.main(args)

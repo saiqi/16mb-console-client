@@ -85,6 +85,25 @@ class PurePostCommand(Command):
 
         return json.loads(r.text)
 
+
+class PureGetCommand(Command):
+
+    method_verb = 'GET'
+
+    def init_parser(self, parser):
+        return parser
+    
+    def main(self, args):
+        url = ''.join([self.base_url, self.url_suffix])
+
+        r = requests.get(url, headers=self.headers)
+
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return json.loads(r.text)
+
+
 class CommandById(Command):
 
     def init_parser(self, parser):
