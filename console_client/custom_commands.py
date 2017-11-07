@@ -74,6 +74,34 @@ class GetAllTemplates(PureGetCommand):
     name = 'all_templates'
     url_suffix = '/api/v1/query/metadata/templates'
 
+
+class AddQueryToTemplate(Command):
+    name = 'add_query_to_template'
+    url_suffix = '/api/v1/command/metadata/template/add_query/<id>'
+    method_verb = 'POST'
+    
+    def init_parser(self, parser):
+        parser.add_argument('id', help='Resource Id')
+        parser.add_argument('--file', '-f', default='', help='Command configuration file')
+        return parser
+        
+    def main(self, args):
+        try:
+            with open(args.file, 'r') as f:
+                data = yaml.load(f.read())
+        except:
+            raise CommandError('Command configuration file not found')
+        
+        resolved_suffix = self.url_suffix.replace('<id>', args.id)
+        url = ''.join([self.base_url, resolved_suffix])
+        
+        r = requests.post(url, data=json.dumps(data), headers=self.headers)
+        
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return json.loads(r.text)
+
     
 class GetLogs(Command):
     name = 'get_logs'
