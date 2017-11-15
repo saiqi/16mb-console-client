@@ -100,9 +100,30 @@ class AddQueryToTemplate(Command):
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
 
-        return json.loads(r.text)
+        return self.result(r)
 
+class DeleteQueryFromTemplate(Command):
+    name = 'delete_query_from_template'
+    url_suffix = '/api/v1/command/metadata/template/delete_query/<template_id>/<query_id>'
+    method_verb = 'DELETE'
     
+    def init_parser(self, parser):
+        parser.add_argument('template_id', help='Template Id')
+        parser.add_argument('query_id', help='Query Id')
+        
+    def main(self, args):
+        resolved_suffix = self.url_suffix.replace('<template_id>', args.template_id)\
+            .replace('<query_id>', args.query_id)
+        url = ''.join([self.base_url, resolved_suffix])
+            
+        r = requests.delete(url, headers=self.headers)
+        
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+            
+        return self.result(r)
+
+     
 class GetLogs(Command):
     name = 'get_logs'
     url_suffix = '/api/v1/query/crontask/logs'
@@ -128,4 +149,4 @@ class GetLogs(Command):
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
 
-        return json.loads(r.text)
+        return self.result(r)

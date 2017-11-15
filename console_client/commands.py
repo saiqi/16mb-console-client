@@ -59,6 +59,12 @@ class Command(object):
 
     def main(self, args):
         raise NotImplementedError
+        
+    def result(self, response):
+        if self.method_verb == 'GET':
+            return json.loads(response.text)
+        else:
+            return self.name + '\t' + str(response.status_code)
 
 
 class PurePostCommand(Command):
@@ -83,7 +89,7 @@ class PurePostCommand(Command):
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
 
-        return json.loads(r.text)
+        return self.result(r)
 
 
 class PureGetCommand(Command):
@@ -101,7 +107,7 @@ class PureGetCommand(Command):
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
 
-        return json.loads(r.text)
+        return self.result(r)
 
 
 class CommandById(Command):
@@ -127,5 +133,5 @@ class CommandById(Command):
             
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
-
-        return json.loads(r.text)
+        
+        return self.result(r)

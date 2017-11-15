@@ -1,4 +1,5 @@
 from terminaltables import AsciiTable
+import yaml
 
 
 def format_value(value):
@@ -30,13 +31,9 @@ def display(data):
                 else:
                     row.append('N/A')
             printed_data.append(row)
+        table = AsciiTable(printed_data)
+        print(table.table)
     elif isinstance(data, dict):
-        keys = [k for k in data.keys()]
-        printed_data.append(keys)
-        row = list()
-        for k in keys:
-            row.append(format_value(data[k]))
-        printed_data.append(row)
-    
-    table = AsciiTable(printed_data)
-    print(table.table)
+        print(yaml.dump(data))
+    else:
+        print(data)

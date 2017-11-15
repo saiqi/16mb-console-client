@@ -37,7 +37,7 @@ def test_pure_post_command(mocker, tmpdir, config_file, good_token):
     mocker.patch('requests.post', side_effect=lambda url, data, headers: MockResponse())
     result = cmd.main(args)
     requests.post.assert_called_once_with(url, data=request_data, headers=headers)
-    assert result['id'] == 'myid'
+    assert result == 'my_command\t201'
 
 
 def test_command_by_id(mocker, config_file, good_token):
