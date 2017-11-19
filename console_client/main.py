@@ -20,7 +20,7 @@ def setup_commands():
 
     for c in classes:
         _class = getattr(module, c[0])
-        if _class.name is not None:
+        if hasattr(_class, 'name') and _class.name is not None:
             commands[_class.name] = _class()
 
     return commands
@@ -59,5 +59,5 @@ def main():
     except CommandError as e:
         print_error('An error has occured while processing command: {}'.format(str(e)))
         raise
-        
+
     display(res)
