@@ -3,7 +3,7 @@ import yaml
 
 
 def format_value(value):
-    value_str = str(value)
+    value_str = str(value).replace('\n', ' ')
     if len(value_str) > 50:
         return value_str[:50] + ' ...'
     return value_str
@@ -34,6 +34,6 @@ def display(data):
         table = AsciiTable(printed_data)
         print(table.table)
     elif isinstance(data, dict):
-        print(yaml.dump(data))
+        print(yaml.dump(data, default_flow_style=False))
     else:
         print(data)
