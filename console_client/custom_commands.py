@@ -151,3 +151,35 @@ class GetLogs(Command):
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
 
         return self.result(r)
+
+
+class ResolveTemplate(Command):
+    name = 'resolve_template'
+    url_suffix = '/api/v1/query/metadata/template/resolve/<id>'
+    method_verb = 'GET'
+
+    def init_parser(self, parser):
+        parser.add_argument('id', help='Resource Id')
+        parser.add_argument('--file', '-f', default='', help='Parameters file')
+        parser.add_argument('--output', '-o', default='result.svg', help='Output SVG name')
+        return parser
+
+    def main(self, args):
+        resolved_suffix = self.url_suffix.replace('<id>', args.id)
+        url = ''.join([self.base_url, resolved_suffix])
+
+        try:
+            with open(args.file, 'r') as f:
+                data = yaml.load(f.read())
+        except:
+            raise CommandError('Command configuration file not found')
+
+        r = requests.get(url, headers=self.headers, data=json.dumps(data))
+
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        with open(args.output, 'w') as f:
+            f.write(r.text)
+
+        return 'Done'
