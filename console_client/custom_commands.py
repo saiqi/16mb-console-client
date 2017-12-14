@@ -4,6 +4,11 @@ import yaml
 from console_client.commands import PurePostCommand, CommandById, Command, PureGetCommand, CommandError
 
 
+class CreateTable(PurePostCommand):
+    name = 'create_table'
+    url_suffix = '/api/v1/command/datastore/create_table'
+
+
 class AddTransformation(PurePostCommand):
     name = 'add_transformation'
     url_suffix = '/api/v1/command/metadata/add_transformation'
