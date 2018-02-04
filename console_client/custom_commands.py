@@ -203,7 +203,7 @@ class AddLabel(Command):
         url = ''.join([self.base_url, self.url_suffix])
 
         try:
-            with open(args.file, 'r') as f:
+            with open(args.file, encoding='utf-8') as f:
                 data = yaml.load(f.read())
         except:
             raise CommandError('Labels file not found')
