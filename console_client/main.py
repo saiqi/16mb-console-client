@@ -52,12 +52,12 @@ def main():
         cmd = commands[name]
     except KeyError:
         print_error('Unkown command {}'.format(name))
-        raise
+        sys.exit(1)
 
     try:
         res = cmd.main(args)
     except CommandError as e:
-        print_error('An error has occured while processing command: {}'.format(str(e)))
-        raise
+        print_error(str(e))
+        sys.exit(1)
 
     display(res)

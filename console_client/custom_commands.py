@@ -190,6 +190,34 @@ class ResolveTemplate(Command):
         return 'Done'
 
 
+class ResolveQuery(Command):
+    name = 'resolve_query'
+    url_suffix = '/api/v1/query/metadata/query/resolve/<id>'
+    method_verb = 'GET'
+
+    def init_parser(self, parser):
+        parser.add_argument('id', help='Resource Id')
+        parser.add_argument('--file', '-f', default='', help='Parameters file')
+        return parser
+
+    def main(self, args):
+        resolved_suffix = self.url_suffix.replace('<id>', args.id)
+        url = ''.join([self.base_url, resolved_suffix])
+
+        try:
+            with open(args.file, 'r') as f:
+                data = yaml.load(f.read())
+        except:
+            raise CommandError('Command configuration file not found')
+
+        r = requests.get(url, headers=self.headers, data=json.dumps(data))
+
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return self.result(r)
+
+
 class AddLabel(Command):
     name = 'add_label'
     url_suffix = '/api/v1/command/referential/add_label'
