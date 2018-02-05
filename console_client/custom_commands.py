@@ -237,12 +237,12 @@ class AddLabel(Command):
             raise CommandError('Labels file not found')
 
         for r in data:
-            r = requests.post(url, data=json.dumps(r), headers=self.headers)
+            req = requests.post(url, data=json.dumps(r), headers=self.headers)
 
-            if r.status_code >= 400:
-                raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+            if req.status_code >= 400:
+                raise CommandError('Error while processing command {}: {}'.format(self.name, req.text))
 
-        return self.result(r)
+        return self.result(req)
 
 
 class DeleteLabel(Command):
@@ -292,6 +292,118 @@ class GetLabel(Command):
         url = ''.join([self.base_url, resolved_suffix])
 
         r = requests.get(url, headers=self.headers)
+
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return self.result(r)
+
+
+class SearchEntity(Command):
+    name = 'search_entity'
+    url_suffix = '/api/v1/query/referential/search_entity'
+    method_verb = 'GET'
+
+    def init_parser(self, parser):
+        parser.add_argument('name', help='Search name')
+        parser.add_argument('type', help='Entity type')
+        parser.add_argument('provider', help='Data provider')
+
+        return parser
+
+    def main(self, args):
+        url = ''.join([self.base_url, self.url_suffix])
+
+        r = requests.get(url, headers=self.headers, data=json.dumps({'name': '\"{}\"'.format(args.name),
+                                                                     'type': args.type,
+                                                                     'provider': args.provider}))
+
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return self.result(r)
+
+
+class SearchEvent(Command):
+    name = 'search_event'
+    url_suffix = '/api/v1/query/referential/search_event'
+    method_verb = 'GET'
+
+    def init_parser(self, parser):
+        parser.add_argument('name', help='Search name')
+        parser.add_argument('date', help='Event date')
+        parser.add_argument('type', help='Event type')
+        parser.add_argument('provider', help='Data provider')
+
+        return parser
+
+    def main(self, args):
+        url = ''.join([self.base_url, self.url_suffix])
+
+        r = requests.get(url, headers=self.headers, data=json.dumps({'name': '\"{}\"'.format(args.name),
+                                                                     'date': args.date,
+                                                                     'type': args.type,
+                                                                     'provider': args.provider}))
+
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return self.result(r)
+
+
+class AddTranslationToEntity(Command):
+    name = 'add_translation_to_entity'
+    url_suffix = '/api/v1/command/referential/add_translation_to_entity/<id>'
+    method_verb = 'POST'
+
+    def init_parser(self, parser):
+        parser.add_argument('--file', '-f', default='', help='Command configuration file')
+        return parser
+
+    def main(self, args):
+        try:
+            with open(args.file, 'r') as f:
+                data = yaml.load(f.read())
+        except:
+            raise CommandError('Command configuration file not found')
+
+        for r in data:
+            resolved_suffix = self.url_suffix.replace('<id>', r['id'])
+            url = ''.join([self.base_url, resolved_suffix])
+            req = requests.post(url, data=json.dumps(r), headers=self.headers)
+
+            if req.status_code >= 400:
+                raise CommandError('Error while processing command {}: {}'.format(self.name, req.text))
+
+        return self.result(req)
+
+
+class AddPictureToEntity(Command):
+    name = 'add_picture_to_entity'
+    url_suffix = '/api/v1/command/referential/add_picture_to_entity/<id>'
+    method_name = 'POST'
+
+    def init_parser(self, parser):
+        parser.add_argument('id', help='Entity Id')
+        parser.add_argument('context', help='Picture context name (ex: customer name)')
+        parser.add_argument('format', help='Picture format name (ex: render, passport ...)')
+        parser.add_argument('file', help='Picture filesystem path')
+
+        return parser
+
+    def main(self, args):
+        import base64
+        with open(args.file, 'rb') as f:
+            picture = base64.b64encode(f.read())
+
+        resolved_suffix = self.url_suffix.replace('<id>', args.id)
+        url = ''.join([self.base_url, resolved_suffix])
+
+        r = requests.post(url, headers=self.headers, data=json.dumps({
+            'id': args.id,
+            'context': args.context,
+            'format': args.format,
+            'picture_b64': picture.decode('utf-8')}))
 
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
