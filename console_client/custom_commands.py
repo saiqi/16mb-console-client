@@ -362,7 +362,7 @@ class AddTranslationToEntity(Command):
 
     def main(self, args):
         try:
-            with open(args.file, 'r') as f:
+            with open(args.file, encoding='utf-8') as f:
                 data = yaml.load(f.read())
         except:
             raise CommandError('Command configuration file not found')
