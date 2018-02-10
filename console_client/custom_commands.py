@@ -161,7 +161,7 @@ class GetLogs(Command):
 class ResolveTemplate(Command):
     name = 'resolve_template'
     url_suffix = '/api/v1/query/metadata/template/resolve/<id>'
-    method_verb = 'GET'
+    method_verb = 'POST'
 
     def init_parser(self, parser):
         parser.add_argument('id', help='Resource Id')
@@ -179,7 +179,7 @@ class ResolveTemplate(Command):
         except:
             raise CommandError('Command configuration file not found')
 
-        r = requests.get(url, headers=self.headers, data=json.dumps(data))
+        r = requests.post(url, headers=self.headers, data=json.dumps(data))
 
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
@@ -193,7 +193,7 @@ class ResolveTemplate(Command):
 class ResolveQuery(Command):
     name = 'resolve_query'
     url_suffix = '/api/v1/query/metadata/query/resolve/<id>'
-    method_verb = 'GET'
+    method_verb = 'POST'
 
     def init_parser(self, parser):
         parser.add_argument('id', help='Resource Id')
@@ -210,7 +210,7 @@ class ResolveQuery(Command):
         except:
             raise CommandError('Command configuration file not found')
 
-        r = requests.get(url, headers=self.headers, data=json.dumps(data))
+        r = requests.post(url, headers=self.headers, data=json.dumps(data))
 
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
@@ -306,17 +306,22 @@ class SearchEntity(Command):
 
     def init_parser(self, parser):
         parser.add_argument('name', help='Search name')
-        parser.add_argument('type', help='Entity type')
-        parser.add_argument('provider', help='Data provider')
+        parser.add_argument('--type', '-t', help='Entity type')
+        parser.add_argument('--provider', '-p', help='Data provider')
 
         return parser
 
     def main(self, args):
         url = ''.join([self.base_url, self.url_suffix])
 
-        r = requests.get(url, headers=self.headers, data=json.dumps({'name': '\"{}\"'.format(args.name),
-                                                                     'type': args.type,
-                                                                     'provider': args.provider}))
+        params = {'name': args.name}
+        if args.type:
+            params['type'] = args.type
+
+        if args.provider:
+            params['provider'] = args.provider
+
+        r = requests.get(url, headers=self.headers, params=params)
 
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
@@ -332,18 +337,22 @@ class SearchEvent(Command):
     def init_parser(self, parser):
         parser.add_argument('name', help='Search name')
         parser.add_argument('date', help='Event date')
-        parser.add_argument('type', help='Event type')
-        parser.add_argument('provider', help='Data provider')
+        parser.add_argument('--type', '-t', help='Entity type')
+        parser.add_argument('--provider', '-p', help='Data provider')
 
         return parser
 
     def main(self, args):
         url = ''.join([self.base_url, self.url_suffix])
 
-        r = requests.get(url, headers=self.headers, data=json.dumps({'name': '\"{}\"'.format(args.name),
-                                                                     'date': args.date,
-                                                                     'type': args.type,
-                                                                     'provider': args.provider}))
+        params = {'name': args.name, 'date': args.date}
+        if args.type:
+            params['type'] = args.type
+
+        if args.provider:
+            params['provider'] = args.provider
+
+        r = requests.get(url, headers=self.headers, params=params)
 
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
