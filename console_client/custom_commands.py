@@ -360,6 +360,30 @@ class SearchEvent(Command):
         return self.result(r)
 
 
+class FuzzySearch(Command):
+    name = 'fuzzy_search'
+    url_suffix = '/api/v1/query/referential/search'
+    method_verb = 'GET'
+
+    def init_parser(self, parser):
+        parser.add_argument('query', help='Search query')
+        parser.add_argument('type', help='Entity type')
+        parser.add_argument('provider', help='Data provider')
+
+        return parser
+
+    def main(self, args):
+        url = ''.join([self.base_url, self.url_suffix])
+        params = {'query': args.query, 'type': args.type, 'provider': args.provider}
+
+        r = requests.get(url, headers=self.headers, params=params)
+
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return self.result(r)
+
+
 class AddTranslationToEntity(Command):
     name = 'add_translation_to_entity'
     url_suffix = '/api/v1/command/referential/add_translation_to_entity/<id>'
