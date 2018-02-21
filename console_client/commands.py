@@ -59,12 +59,9 @@ class Command(object):
 
     def main(self, args):
         raise NotImplementedError
-        
+
     def result(self, response):
-        if self.method_verb == 'GET':
-            return json.loads(response.text)
-        else:
-            return self.name + '\t' + str(response.status_code)
+        return json.loads(response.text)
 
 
 class PurePostCommand(Command):
@@ -98,7 +95,7 @@ class PureGetCommand(Command):
 
     def init_parser(self, parser):
         return parser
-    
+
     def main(self, args):
         url = ''.join([self.base_url, self.url_suffix])
 
@@ -130,8 +127,8 @@ class CommandById(Command):
             r = requests.put(url, headers=self.headers)
         else:
             raise CommandError('Unsupported HTTP verb: {}'.format(self.method_verb))
-            
+
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
-        
+
         return self.result(r)
