@@ -158,38 +158,6 @@ class GetLogs(Command):
         return self.result(r)
 
 
-# class ResolveTemplate(Command):
-#     name = 'resolve_template'
-#     url_suffix = '/api/v1/query/metadata/template/resolve/<id>'
-#     method_verb = 'POST'
-
-#     def init_parser(self, parser):
-#         parser.add_argument('id', help='Resource Id')
-#         parser.add_argument('--file', '-f', default='', help='Parameters file')
-#         parser.add_argument('--output', '-o', default='result.svg', help='Output SVG name')
-#         return parser
-
-#     def main(self, args):
-#         resolved_suffix = self.url_suffix.replace('<id>', args.id)
-#         url = ''.join([self.base_url, resolved_suffix])
-
-#         try:
-#             with open(args.file, 'r') as f:
-#                 data = yaml.load(f.read())
-#         except:
-#             raise CommandError('Command configuration file not found')
-
-#         r = requests.post(url, headers=self.headers, data=json.dumps(data))
-
-#         if r.status_code >= 400:
-#             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
-
-#         with open(args.output, 'w') as f:
-#             f.write(r.text)
-
-#         return 'Done'
-
-
 class ResolveTemplate(Command):
     name = 'resolve_template'
     url_suffix = '/api/v1/query/metadata/template/resolve_with_ids/<id>'
@@ -446,7 +414,7 @@ class AddTranslationToEntity(Command):
 class AddPictureToEntity(Command):
     name = 'add_picture_to_entity'
     url_suffix = '/api/v1/command/referential/add_picture_to_entity/<id>'
-    method_name = 'POST'
+    method_verb = 'POST'
 
     def init_parser(self, parser):
         parser.add_argument('id', help='Entity Id')
@@ -469,6 +437,33 @@ class AddPictureToEntity(Command):
             'context': args.context,
             'format': args.format,
             'picture_b64': picture.decode('utf-8')}))
+
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return self.result(r)
+
+
+class DeletePictureFromEntity(Command):
+    name = 'delete_picture_from_entity'
+    url_suffix = '/api/v1/command/referential/delete_picture_from_entity/<entity_id>/<context>/<format>'
+    method_verb = 'DELETE'
+
+    def init_parser(self, parser):
+        parser.add_argument('id', help='Entity Id')
+        parser.add_argument('context', help='Picture context name (ex: customer name)')
+        parser.add_argument('format', help='Picture format name (ex: render, passport ...)')
+
+        return parser
+
+    def main(self, args):
+        resolved_suffix = self.url_suffix.replace('<entity_id>', args.id)\
+        .replace('<context>', args.context)\
+        .replace('<format>', args.format)
+
+        url = ''.join([self.base_url, resolved_suffix])
+
+        r = requests.delete(url, headers=self.headers)
 
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
