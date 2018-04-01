@@ -4,6 +4,17 @@ import yaml
 from console_client.commands import PurePostCommand, CommandById, Command, PureGetCommand, CommandError
 
 
+class AddSubscription(PurePostCommand):
+    name = 'add_subscription'
+    url_suffix = '/api/v1/command/subscription/add'
+
+
+class GetSubscription(CommandById):
+    name = 'get_subscription'
+    url_suffix = '/api/v1/query/subscription/<id>'
+    method_verb = 'GET'
+
+
 class CreateTable(PurePostCommand):
     name = 'create_table'
     url_suffix = '/api/v1/command/datastore/create_table'
