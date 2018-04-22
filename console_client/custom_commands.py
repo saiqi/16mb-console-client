@@ -229,6 +229,47 @@ class ResolveQuery(Command):
         return self.result(r)
 
 
+class ExportSVG(Command):
+    name = 'export_svg'
+    url_suffix = '/api/v1/command/export'
+    method_verb = 'POST'
+
+    def init_parser(self, parser):
+        parser.add_argument('svg', help='SVG file to export')
+        parser.add_argument('filename', help='Exported file name')
+        parser.add_argument('--format', '-F', default='png', help='File format')
+        parser.add_argument('--dpi', '-D', default=90, help='Export DPI', type=int)
+        parser.add_argument('--width', '-W', default=800, help='Export width', type=int)
+        parser.add_argument('--height', '-H', default=600, help='Export height', type=int)
+        return parser
+
+    def main(self, args):
+        url = ''.join([self.base_url, self.url_suffix])
+
+        try:
+            with open(args.svg, 'r') as f:
+                svg = f.read()
+        except:
+            raise CommandError('SVG file not found')
+
+        data = {
+            'svg': svg,
+            'filename': args.filename,
+            'format': {
+                'type': args.format,
+                'dpi': args.dpi,
+                'width': args.width,
+                'height': args.height
+            }
+        }
+
+        r = requests.post(url, headers=self.headers, data=json.dumps(data))
+
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return self.result(r)
+
 class AddLabel(Command):
     name = 'add_label'
     url_suffix = '/api/v1/command/referential/add_label'
