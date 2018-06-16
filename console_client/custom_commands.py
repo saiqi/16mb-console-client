@@ -141,34 +141,6 @@ class DeleteQueryFromTemplate(Command):
         return self.result(r)
 
 
-class GetLogs(Command):
-    name = 'get_logs'
-    url_suffix = '/api/v1/query/crontask/logs'
-    method_verb = 'GET'
-
-    def init_parser(self, parser):
-        parser.add_argument('--method', '-m', default='', help='Method name')
-        parser.add_argument('--tail', '-t', default='', help='Tail logs')
-        return parser
-
-    def main(self, args):
-        url = ''.join([self.base_url, self.url_suffix])
-        params = dict()
-        if args.method != '':
-            params['method_name'] = args.method
-        if args.tail != '':
-            params['tail'] = args.tail
-        if params:
-            r = requests.get(url, headers=self.headers, params=params)
-        else:
-            r = requests.get(url, headers=self.headers)
-
-        if r.status_code >= 400:
-            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
-
-        return self.result(r)
-
-
 class ResolveTemplate(Command):
     name = 'resolve_template'
     url_suffix = '/api/v1/query/metadata/template/resolve_with_ids/<id>'
@@ -439,6 +411,33 @@ class FuzzySearch(Command):
 class AddTranslationToEntity(Command):
     name = 'add_translation_to_entity'
     url_suffix = '/api/v1/command/referential/add_translation_to_entity/<id>'
+    method_verb = 'POST'
+
+    def init_parser(self, parser):
+        parser.add_argument('--file', '-f', default='', help='Command configuration file')
+        return parser
+
+    def main(self, args):
+        try:
+            with open(args.file, encoding='utf-8') as f:
+                data = yaml.load(f.read())
+        except:
+            raise CommandError('Command configuration file not found')
+
+        for r in data:
+            resolved_suffix = self.url_suffix.replace('<id>', r['id'])
+            url = ''.join([self.base_url, resolved_suffix])
+            req = requests.post(url, data=json.dumps(r), headers=self.headers)
+
+            if req.status_code >= 400:
+                raise CommandError('Error while processing command {}: {}'.format(self.name, req.text))
+
+        return self.result(req)
+
+
+class AddMultilineToEntity(Command):
+    name = 'add_multiline_to_entity'
+    url_suffix = '/api/v1/command/referential/add_multiline_to_entity/<id>'
     method_verb = 'POST'
 
     def init_parser(self, parser):
