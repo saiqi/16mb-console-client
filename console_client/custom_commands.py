@@ -209,10 +209,8 @@ class ExportSVG(Command):
     def init_parser(self, parser):
         parser.add_argument('svg', help='SVG file to export')
         parser.add_argument('filename', help='Exported file name')
-        parser.add_argument('--format', '-F', default='png', help='File format')
-        parser.add_argument('--dpi', '-D', default=90, help='Export DPI', type=int)
-        parser.add_argument('--width', '-W', default=800, help='Export width', type=int)
-        parser.add_argument('--height', '-H', default=600, help='Export height', type=int)
+        parser.add_argument('--format', '-F', help='File format')
+        parser.add_argument('--dpi', '-D', help='Export DPI', type=int)
         return parser
 
     def main(self, args):
@@ -229,9 +227,7 @@ class ExportSVG(Command):
             'filename': args.filename,
             'format': {
                 'type': args.format,
-                'dpi': args.dpi,
-                'width': args.width,
-                'height': args.height
+                'dpi': args.dpi
             }
         }
 
