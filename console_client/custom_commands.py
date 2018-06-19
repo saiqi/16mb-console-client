@@ -209,7 +209,7 @@ class ExportSVG(Command):
     def init_parser(self, parser):
         parser.add_argument('svg', help='SVG file to export')
         parser.add_argument('filename', help='Exported file name')
-        parser.add_argument('--format', '-F', help='File format')
+        parser.add_argument('format', help='File format')
         parser.add_argument('--dpi', '-D', help='Export DPI', type=int)
         return parser
 
