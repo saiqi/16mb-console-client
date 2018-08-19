@@ -47,6 +47,27 @@ class DeployFunction(CommandById):
     url_suffix = '/api/v1/command/metadata/deploy_function/<id>'
     method_verb = 'POST'
 
+class AddTrigger(PurePostCommand):
+    name = 'add_trigger'
+    url_suffix = '/api/v1/command/metadata/add_trigger'
+
+
+class DeleteTrigger(CommandById):
+    name = 'delete_trigger'
+    url_suffix = '/api/v1/command/metadata/delete_trigger/<id>'
+    method_verb = 'DELETE'
+
+
+class GetTriggerById(CommandById):
+    name = 'get_trigger'
+    url_suffix = '/api/v1/query/metadata/trigger/<id>'
+    method_verb = 'GET'
+
+
+class GetAllTriggers(PureGetCommand):
+    name = 'all_triggers'
+    url_suffix = '/api/v1/query/metadata/triggers'
+
 
 class AddQuery(PurePostCommand):
     name = 'add_query'
