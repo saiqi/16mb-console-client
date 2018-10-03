@@ -222,6 +222,11 @@ class ResolveQuery(Command):
         return self.result(r)
 
 
+class RefreshTriggers(PurePostCommand):
+    name = 'refresh_triggers'
+    url_suffix = '/api/v1/command/metadata/triggers/refresh'
+
+
 class ExportSVG(Command):
     name = 'export_svg'
     url_suffix = '/api/v1/command/export'
