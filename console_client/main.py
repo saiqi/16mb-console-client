@@ -28,7 +28,6 @@ def setup_commands():
 
 def setup_parser(commands):
     parser = argparse.ArgumentParser()
-    #parser.add_argument('command')
 
     subparsers = parser.add_subparsers(help='commands choice')
 

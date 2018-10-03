@@ -61,7 +61,10 @@ class Command(object):
         raise NotImplementedError
 
     def result(self, response):
-        return json.loads(response.text)
+        try:
+            return json.loads(response.text)
+        except:
+            return response.text
 
 
 class PurePostCommand(Command):
