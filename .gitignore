@@ -3,7 +3,7 @@ __pycache__/
 .cache/
 .idea/
 .che/
-venv/
+.venv/
 build/
 *.egg-info
 dist/

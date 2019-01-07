@@ -4,6 +4,41 @@ import yaml
 from console_client.commands import PurePostCommand, CommandById, Command, PureGetCommand, CommandError
 
 
+class CreateUser(Command):
+    name = 'create_user'
+    url_suffix = '/users'
+    method_verb = 'POST'
+
+    def init_parser(self, parser):
+        return parser
+
+    def main(self, args):
+
+        def __input_and_check(label):
+            while True:
+                x = input('Enter {}: '.format(label))
+                check = input('Confim {}: '.format(label))
+                if x == check:
+                    return x
+                print('Mismatched ! Please reenter {}'.format(label))
+
+        user = __input_and_check('user name')
+        email = __input_and_check('email')
+        while True:
+            role = input('Enter role: ')
+            if role in ('read', 'write', 'admin',):
+                break
+            print('Bad value ! Only read, write and admin are supported')
+        url = ''.join([self.base_url, self.url_suffix])
+
+        r = requests.post(url, json={'user': user, 'email': email, 'role': role}, headers=self.headers)
+
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return self.result(r)
+
+
 class AddSubscription(PurePostCommand):
     name = 'add_subscription'
     url_suffix = '/api/v1/command/subscription/add'
