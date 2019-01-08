@@ -39,6 +39,26 @@ class CreateUser(Command):
         return self.result(r)
 
 
+class ChangePassword(Command):
+    name = 'change_password'
+    url_suffix = '/users/<id>'
+    method_verb = 'PUT'
+
+    def init_parser(self, parser):
+        parser.add_argument('id', help='User Id')
+        return parser
+
+    def main(self, args):
+        resolved_suffix = self.url_suffix.replace('<id>', args.id)
+        url = ''.join([self.base_url, resolved_suffix])
+
+        r = requests.put(url, headers=self.headers, json={'password': True})
+
+        if r.status_code >= 400:
+            raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
+
+        return self.result(r)
+
 class AddSubscription(PurePostCommand):
     name = 'add_subscription'
     url_suffix = '/api/v1/command/subscription/add'
