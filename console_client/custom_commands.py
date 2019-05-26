@@ -75,6 +75,11 @@ class CreateTable(PurePostCommand):
     url_suffix = '/api/v1/command/datastore/create_table'
 
 
+class CreateView(PurePostCommand):
+    name = 'create_view'
+    url_suffix = '/api/v1/command/datastore/create_view'
+
+
 class AddTransformation(PurePostCommand):
     name = 'add_transformation'
     url_suffix = '/api/v1/command/metadata/add_transformation'
