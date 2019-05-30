@@ -30,9 +30,10 @@ def _save_config(config):
 
 def _init_config():
     username = input('User: ')
-    base_url = input('URL Root: ')
+    base_url = input('Base URL Root: ')
+    auth_url = input('Auth URL Root: ')
 
-    config = {'username': username, 'base_url': base_url, 'auth_token': ''}
+    config = {'username': username, 'base_url': base_url, 'auth_url': auth_url, 'auth_token': ''}
 
     return config
 

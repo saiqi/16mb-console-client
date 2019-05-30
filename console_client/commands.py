@@ -23,7 +23,7 @@ class Command(object):
         self._handle_config()
 
     def _authenticate(self):
-        url = ''.join([self.base_url, '/auth'])
+        url = ''.join([self.auth_url, '/auth'])
         password = getpass.getpass('Password: ')
         r = requests.post(url, data={'user': self.username, 'password': password})
 
@@ -36,6 +36,7 @@ class Command(object):
         config = get_config()
         self.base_url = config['base_url']
         self.username = config['username']
+        self.auth_url = config.get('auth_url', self.base_url)
 
         authentication_needed = False
         auth_token = config['auth_token']
