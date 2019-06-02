@@ -29,7 +29,7 @@ class CreateUser(Command):
             if role in ('read', 'write', 'admin',):
                 break
             print('Bad value ! Only read, write and admin are supported')
-        url = ''.join([self.base_url, self.url_suffix])
+        url = ''.join([self.auth_url, self.url_suffix])
 
         r = requests.post(url, json={'user': user, 'email': email, 'role': role}, headers=self.headers)
 
@@ -50,7 +50,7 @@ class ChangePassword(Command):
 
     def main(self, args):
         resolved_suffix = self.url_suffix.replace('<id>', args.id)
-        url = ''.join([self.base_url, resolved_suffix])
+        url = ''.join([self.auth_url, resolved_suffix])
 
         r = requests.put(url, headers=self.headers, json={'password': True})
 
