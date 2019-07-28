@@ -59,6 +59,12 @@ class ChangePassword(Command):
 
         return self.result(r)
 
+
+class AddInput(PurePostCommand):
+    name = 'add_input'
+    url_suffix = '/api/v1/command/input/add'
+
+
 class AddSubscription(PurePostCommand):
     name = 'add_subscription'
     url_suffix = '/api/v1/command/subscription/add'
