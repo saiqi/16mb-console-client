@@ -11,7 +11,7 @@ setup(
     description='16 Megabytes console client',
     install_requires=[
         'PyJWT==1.5.3',
-        'PyYAML==3.12',
+        'PyYAML==5.1',
         'requests==2.14.2',
         'terminaltables==3.1.0'
     ],
