@@ -1,7 +1,8 @@
 import json
+import os
 import requests
 import yaml
-from console_client.commands import PurePostCommand, CommandById, Command, PureGetCommand, CommandError
+from console_client.commands import PurePostCommand, CommandById, Command, PureGetCommand, CommandError, CommandBundle
 
 
 class CreateUser(Command):
@@ -112,6 +113,7 @@ class DeployFunction(CommandById):
     name = 'deploy_function'
     url_suffix = '/api/v1/command/metadata/deploy_function/<id>'
     method_verb = 'POST'
+
 
 class AddTrigger(PurePostCommand):
     name = 'add_trigger'
@@ -383,6 +385,7 @@ class ExportSVG(Command):
 
         return self.result(r)
 
+
 class AddLabel(Command):
     name = 'add_label'
     url_suffix = '/api/v1/command/referential/add_label'
@@ -612,6 +615,7 @@ class AddPictureToEntity(Command):
         parser.add_argument('id', help='Entity Id')
         parser.add_argument('context', help='Picture context name (ex: customer name)')
         parser.add_argument('format', help='Picture format name (ex: render, passport ...)')
+        parser.add_argument('kind', choices = ['vectorial', 'bitmap'], help='Vectorial or bitmap')
         parser.add_argument('file', help='Picture filesystem path')
 
         return parser
@@ -619,7 +623,7 @@ class AddPictureToEntity(Command):
     def main(self, args):
         import base64
         with open(args.file, 'rb') as f:
-            picture = base64.b64encode(f.read())
+            picture = base64.b64encode(f.read()) if args.kind == 'bitmap' else f.read()
 
         resolved_suffix = self.url_suffix.replace('<id>', args.id)
         url = ''.join([self.base_url, resolved_suffix])
@@ -628,7 +632,8 @@ class AddPictureToEntity(Command):
             'id': args.id,
             'context': args.context,
             'format': args.format,
-            'picture_b64': picture.decode('utf-8')}))
+            'kind': args.kind,
+            'content': picture.decode('utf-8')}))
 
         if r.status_code >= 400:
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
@@ -638,20 +643,22 @@ class AddPictureToEntity(Command):
 
 class DeletePictureFromEntity(Command):
     name = 'delete_picture_from_entity'
-    url_suffix = '/api/v1/command/referential/delete_picture_from_entity/<entity_id>/<context>/<format>'
+    url_suffix = '/api/v1/command/referential/delete_picture_from_entity/<entity_id>/<context>/<format>/<kind>'
     method_verb = 'DELETE'
 
     def init_parser(self, parser):
         parser.add_argument('id', help='Entity Id')
         parser.add_argument('context', help='Picture context name (ex: customer name)')
         parser.add_argument('format', help='Picture format name (ex: render, passport ...)')
+        parser.add_argument('kind', help='Vectorial or bitmap')
 
         return parser
 
     def main(self, args):
         resolved_suffix = self.url_suffix.replace('<entity_id>', args.id)\
         .replace('<context>', args.context)\
-        .replace('<format>', args.format)
+        .replace('<format>', args.format)\
+        .replace('<kind>', args.kind)
 
         url = ''.join([self.base_url, resolved_suffix])
 
@@ -661,3 +668,23 @@ class DeletePictureFromEntity(Command):
             raise CommandError('Error while processing command {}: {}'.format(self.name, r.text))
 
         return self.result(r)
+
+
+class DeployTables(CommandBundle):
+    name = 'deploy_tables'
+    file_command = CreateTable()
+
+
+class DeployViews(CommandBundle):
+    name = 'deploy_views'
+    file_command = CreateView()
+
+
+class DeployTransformations(CommandBundle):
+    name = 'deploy_transformations'
+    file_command = AddTransformation()
+    next_command = DeployFunction()
+    next_resource_key = 'id'
+
+    def get_files(self, directory):
+        return sorted(super().get_files(directory), key=lambda x: 0 if x.startswith('fit') else 1)

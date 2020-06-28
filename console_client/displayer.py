@@ -1,5 +1,10 @@
 from terminaltables import AsciiTable
+import sys
 import yaml
+
+
+def print_error(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 
 def format_value(value):

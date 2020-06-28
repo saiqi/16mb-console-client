@@ -5,11 +5,7 @@ import sys
 
 from console_client.commands import CommandError
 from . import custom_commands
-from console_client.displayer import display
-
-
-def print_error(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+from console_client.displayer import display, print_error
 
 
 def setup_commands():
@@ -60,3 +56,6 @@ def main():
         sys.exit(1)
 
     display(res)
+
+if __name__ == "__main__":
+    main()
