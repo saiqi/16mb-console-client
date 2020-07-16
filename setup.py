@@ -12,7 +12,7 @@ setup(
     install_requires=[
         'PyJWT==1.5.3',
         'PyYAML==3.12',
-        'requests==2.14.2',
+        'requests==2.20.0',
         'terminaltables==3.1.0'
     ],
     extra_requires={
