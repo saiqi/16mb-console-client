@@ -248,7 +248,7 @@ class UpdateSVGInTemplate(Command):
     def main(self, args):
         try:
             with open(args.file, 'r') as f:
-                svg = f.read()
+                svg = f.read().encode('utf-8').decode('utf-8')
         except:
             raise CommandError('HTML file not found')
         
